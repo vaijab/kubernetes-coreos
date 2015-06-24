@@ -4,7 +4,7 @@ Documentation=https://github.com/GoogleCloudPlatform/kubernetes
 
 [Service]
 ExecStart=/opt/bin/hyperkube controller-manager \
-  --master=localhost:8080 \
+  --master=http://localhost:8080 \
   --logtostderr=true
 Restart=always
 RestartSec=10
