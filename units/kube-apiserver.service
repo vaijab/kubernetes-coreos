@@ -1,0 +1,16 @@
+[Unit]
+Description=Kubernetes API Server
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+[Service]
+ExecStart=/opt/bin/hyperkube apiserver \
+  --address=0.0.0.0 \
+  --port=8081 \
+  --portal-net=10.10.0.0/16 \
+  --etcd-servers=http://127.0.0.1:2379 \
+  --logtostderr=true
+Restart=always
+RestartSec=10
+
+[X-Fleet]
+MachineMetadata=role=kubernetes

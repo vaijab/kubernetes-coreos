@@ -1,0 +1,55 @@
+#cloud-config
+
+---
+coreos:
+  etcd2:
+    advertise-client-urls: http://$public_ipv4:2379,http://$public_ipv4:4001
+    listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
+    initial-advertise-peer-urls: http://$public_ipv4:2380,http://$public_ipv4:7001
+    listen-peer-urls: http://$public_ipv4:2380,http://$public_ipv4:7001
+  fleet:
+    public-ip: $public_ipv4
+    metadata: public_ipv4=$public_ipv4,role=kubernetes
+  flannel:
+    interface: $public_ipv4
+  units:
+  - name: etcd2.service
+    command: start
+  - name: fleet.service
+    command: start
+    enable: true
+  - name: flanneld.service
+    command: start
+    enable: true
+    drop-ins:
+    - name: 50-network-config.conf
+      content: |
+        [Service]
+        ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{"Network":"10.10.0.0/16","Backend":{"Type":"vxlan"}}'
+  - name: install-kubernetes.service
+    command: start
+    content: |
+      [Unit]
+      Description=Install kubernetes binaries
+
+      [Service]
+      Type=oneshot
+      RemainAfterExit=yes
+      TimeoutStartSec=300
+      ExecStart=/usr/bin/mkdir -p /opt/bin
+      ExecStart=/usr/bin/wget -q https://storage.googleapis.com/kubernetes-release/release/v0.19.3/bin/linux/amd64/hyperkube -O /opt/bin/hyperkube
+      ExecStart=/usr/bin/wget -q https://storage.googleapis.com/kubernetes-release/release/v0.19.3/bin/linux/amd64/kubectl -O /opt/bin/kubectl
+      ExecStartPost=/usr/bin/chmod +x /opt/bin/hyperkube /opt/bin/kubectl
+  - name: install-kube-apiproxy.service
+    command: start
+    content: |
+      [Unit]
+      Description=Install kube-apiproxy
+
+      [Service]
+      Type=oneshot
+      RemainAfterExit=yes
+      TimeoutStartSec=300
+      ExecStart=/usr/bin/mkdir -p /opt/bin
+      ExecStart=/usr/bin/wget -q https://github.com/vaijab/kube-apiproxy/releases/download/v0.0.2/kube-apiproxy-0.0.2-linux-amd64 -O /opt/bin/kube-apiproxy
+      ExecStartPost=/usr/bin/chmod +x /opt/bin/kube-apiproxy
