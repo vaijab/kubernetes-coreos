@@ -26,20 +26,36 @@ coreos:
       content: |
         [Service]
         ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{"Network":"10.10.0.0/16","Backend":{"Type":"vxlan"}}'
-  - name: install-kubernetes.service
+  - name: install-hyperkube.service
     command: start
     content: |
       [Unit]
-      Description=Install kubernetes binaries
+      Description=Install hyperkube binary
 
       [Service]
       Type=oneshot
       RemainAfterExit=yes
       TimeoutStartSec=300
+      Environment="URL=https://storage.googleapis.com/kubernetes-release/release/v0.20.2/bin/linux/amd64/hyperkube"
+      Environment="OUTPUT_FILE=/opt/bin/hyperkube"
+      Environment="MD5SUM=28850db4205b359b7d389a54d6e69231"
       ExecStart=/usr/bin/mkdir -p /opt/bin
-      ExecStart=/usr/bin/wget -q https://storage.googleapis.com/kubernetes-release/release/v0.19.3/bin/linux/amd64/hyperkube -O /opt/bin/hyperkube
-      ExecStart=/usr/bin/wget -q https://storage.googleapis.com/kubernetes-release/release/v0.19.3/bin/linux/amd64/kubectl -O /opt/bin/kubectl
-      ExecStartPost=/usr/bin/chmod +x /opt/bin/hyperkube /opt/bin/kubectl
+      ExecStart=/usr/bin/bash -c 'until [[ -x ${OUTPUT_FILE} ]] && [[ $(md5sum ${OUTPUT_FILE} | cut -f1 -d" ") == ${MD5SUM} ]]; do wget -O ${OUTPUT_FILE} ${URL} && chmod +x ${OUTPUT_FILE}; done'
+  - name: install-kubectl.service
+    command: start
+    content: |
+      [Unit]
+      Description=Install kubectl binary
+
+      [Service]
+      Type=oneshot
+      RemainAfterExit=yes
+      TimeoutStartSec=300
+      Environment="URL=https://storage.googleapis.com/kubernetes-release/release/v0.20.2/bin/linux/amd64/kubectl"
+      Environment="OUTPUT_FILE=/opt/bin/kubectl"
+      Environment="MD5SUM=9d559fc293562dcb5b4c31a10389ca5e"
+      ExecStart=/usr/bin/mkdir -p /opt/bin
+      ExecStart=/usr/bin/bash -c 'until [[ -x ${OUTPUT_FILE} ]] && [[ $(md5sum ${OUTPUT_FILE} | cut -f1 -d" ") == ${MD5SUM} ]]; do wget -O ${OUTPUT_FILE} ${URL} && chmod +x ${OUTPUT_FILE}; done'
   - name: install-kube-apiproxy.service
     command: start
     content: |
@@ -50,6 +66,8 @@ coreos:
       Type=oneshot
       RemainAfterExit=yes
       TimeoutStartSec=300
+      Environment="URL=https://github.com/vaijab/kube-apiproxy/releases/download/v0.0.2/kube-apiproxy-0.0.2-linux-amd64"
+      Environment="OUTPUT_FILE=/opt/bin/kube-apiproxy"
+      Environment="MD5SUM=06d0a0465524f74a682ce1de85f6b662"
       ExecStart=/usr/bin/mkdir -p /opt/bin
-      ExecStart=/usr/bin/wget -q https://github.com/vaijab/kube-apiproxy/releases/download/v0.0.2/kube-apiproxy-0.0.2-linux-amd64 -O /opt/bin/kube-apiproxy
-      ExecStartPost=/usr/bin/chmod +x /opt/bin/kube-apiproxy
+      ExecStart=/usr/bin/bash -c 'until [[ -x ${OUTPUT_FILE} ]] && [[ $(md5sum ${OUTPUT_FILE} | cut -f1 -d" ") == ${MD5SUM} ]]; do wget -O ${OUTPUT_FILE} ${URL} && chmod +x ${OUTPUT_FILE}; done'
