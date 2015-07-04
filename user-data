@@ -26,11 +26,11 @@ coreos:
       content: |
         [Service]
         ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{"Network":"10.10.0.0/16","Backend":{"Type":"vxlan"}}'
-  - name: install-hyperkube.service
+  - name: install-kubernetes.service
     command: start
     content: |
       [Unit]
-      Description=Install hyperkube binary
+      Description=Install kubernetes
 
       [Service]
       Type=oneshot
@@ -39,6 +39,7 @@ coreos:
       Environment="URL=https://storage.googleapis.com/kubernetes-release/release/v0.20.2/bin/linux/amd64/hyperkube"
       Environment="OUTPUT_FILE=/opt/bin/hyperkube"
       Environment="MD5SUM=28850db4205b359b7d389a54d6e69231"
+      ExecStart=/usr/bin/install -d -o root -g root -m 0700 /etc/kubernetes
       ExecStart=/usr/bin/mkdir -p /opt/bin
       ExecStart=/usr/bin/bash -c 'until [[ -x ${OUTPUT_FILE} ]] && [[ $(md5sum ${OUTPUT_FILE} | cut -f1 -d" ") == ${MD5SUM} ]]; do wget -O ${OUTPUT_FILE} ${URL} && chmod +x ${OUTPUT_FILE}; done'
   - name: install-kubectl.service
