@@ -36,12 +36,12 @@ coreos:
       Type=oneshot
       RemainAfterExit=yes
       TimeoutStartSec=300
-      Environment="URL=https://storage.googleapis.com/kubernetes-release/release/v0.21.0/bin/linux/amd64/hyperkube"
+      Environment="URL=https://storage.googleapis.com/kubernetes-release/release/v1.0.1/bin/linux/amd64/hyperkube"
       Environment="OUTPUT_FILE=/opt/bin/hyperkube"
-      Environment="MD5SUM=a2397039e3c06e0f56982299c0a598b1"
+      Environment="MD5SUM=7ed6771de55ef14769048253bbbd8d39"
       ExecStart=/usr/bin/install -d -o root -g root -m 0700 /etc/kubernetes
       ExecStart=/usr/bin/mkdir -p /opt/bin
-      ExecStart=/usr/bin/bash -c 'until [[ -x ${OUTPUT_FILE} ]] && [[ $(md5sum ${OUTPUT_FILE} | cut -f1 -d" ") == ${MD5SUM} ]]; do wget -O ${OUTPUT_FILE} ${URL} && chmod +x ${OUTPUT_FILE}; done'
+      ExecStart=/usr/bin/bash -c 'until [[ -x ${OUTPUT_FILE} ]] && [[ $(md5sum ${OUTPUT_FILE} | cut -f1 -d" ") == ${MD5SUM} ]]; do wget -q -O ${OUTPUT_FILE} ${URL} && chmod +x ${OUTPUT_FILE}; done'
   - name: install-kubectl.service
     command: start
     content: |
@@ -52,11 +52,11 @@ coreos:
       Type=oneshot
       RemainAfterExit=yes
       TimeoutStartSec=300
-      Environment="URL=https://storage.googleapis.com/kubernetes-release/release/v0.21.0/bin/linux/amd64/kubectl"
+      Environment="URL=https://storage.googleapis.com/kubernetes-release/release/v1.0.1/bin/linux/amd64/kubectl"
       Environment="OUTPUT_FILE=/opt/bin/kubectl"
-      Environment="MD5SUM=785a637ba5bc15c3d95a9a2e356ced80"
+      Environment="MD5SUM=d55f69a79a01477ec8d0ab0584a91355"
       ExecStart=/usr/bin/mkdir -p /opt/bin
-      ExecStart=/usr/bin/bash -c 'until [[ -x ${OUTPUT_FILE} ]] && [[ $(md5sum ${OUTPUT_FILE} | cut -f1 -d" ") == ${MD5SUM} ]]; do wget -O ${OUTPUT_FILE} ${URL} && chmod +x ${OUTPUT_FILE}; done'
+      ExecStart=/usr/bin/bash -c 'until [[ -x ${OUTPUT_FILE} ]] && [[ $(md5sum ${OUTPUT_FILE} | cut -f1 -d" ") == ${MD5SUM} ]]; do wget -q -O ${OUTPUT_FILE} ${URL} && chmod +x ${OUTPUT_FILE}; done'
   - name: install-kube-apiproxy.service
     command: start
     content: |
@@ -71,4 +71,4 @@ coreos:
       Environment="OUTPUT_FILE=/opt/bin/kube-apiproxy"
       Environment="MD5SUM=06d0a0465524f74a682ce1de85f6b662"
       ExecStart=/usr/bin/mkdir -p /opt/bin
-      ExecStart=/usr/bin/bash -c 'until [[ -x ${OUTPUT_FILE} ]] && [[ $(md5sum ${OUTPUT_FILE} | cut -f1 -d" ") == ${MD5SUM} ]]; do wget -O ${OUTPUT_FILE} ${URL} && chmod +x ${OUTPUT_FILE}; done'
+      ExecStart=/usr/bin/bash -c 'until [[ -x ${OUTPUT_FILE} ]] && [[ $(md5sum ${OUTPUT_FILE} | cut -f1 -d" ") == ${MD5SUM} ]]; do wget -q -O ${OUTPUT_FILE} ${URL} && chmod +x ${OUTPUT_FILE}; done'
